@@ -12,5 +12,6 @@ public interface IProductRepository extends JpaRepository<Product, Long> {
             "p.code LIKE %:searchKey% OR " +
             "p.name LIKE %:searchKey% OR " +
             "p.description LIKE %:searchKey%")
-    List<Product> searchProducts(@Param("searchKey") String searchKey);
+    List<Product> findProductsByKey(@Param("searchKey") String searchKey);
+    List<Product> findProductsBySupplier_Id(Long supplierId);
 }

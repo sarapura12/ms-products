@@ -1,13 +1,14 @@
 package com.productmanager.application.mappers;
 
 import com.productmanager.application.dto.SupplierDto;
+import com.productmanager.application.model.entity.Supplier;
 import org.mapstruct.Mapper;
 import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
 @Component
 public interface ISupplierMapper {
-    SupplierDto supplierToSupplierDto(SupplierDto supplier);
+    SupplierDto supplierToSupplierDto(Supplier supplier);
 
-    SupplierDto supplierDtoToSupplier(SupplierDto supplierDto);
+    Supplier supplierDtoToSupplier(SupplierDto supplierDto);
 }

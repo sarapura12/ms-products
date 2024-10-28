@@ -1,10 +1,12 @@
 package com.productmanager.application.service.impl;
 
+import com.productmanager.application.dto.ProductDto;
 import com.productmanager.application.exception.ResourceNotFoundException;
 import com.productmanager.application.model.entity.Product;
 import com.productmanager.application.repository.IProductRepository;
 import com.productmanager.application.repository.ISupplierRepository;
 import com.productmanager.application.service.interfaces.IProductService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +20,11 @@ public class ProductServiceImpl implements IProductService {
     private IProductRepository productRepository;
 
     @Override
-    public Product addProduct(Product product, Long supplierId) {
+    @Transactional
+    public Product addProduct(ProductDto product) {
         var supplier = supplierService.
-                findById(supplierId)
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", supplierId));
+                findById(product.getSupplierId())
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", product.getSupplierId()));
 
         var newProduct = new Product();
 
@@ -34,9 +37,8 @@ public class ProductServiceImpl implements IProductService {
         newProduct.setStatus(product.getStatus());
         newProduct.setSupplier(supplier);
 
-        product.setSupplier(supplier);
-
-        return productRepository.save(newProduct);
+        productRepository.save(newProduct);
+        return newProduct;
     }
 
     @Override
@@ -49,34 +51,36 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void updateProduct(Long id, Product product) {
+    @Transactional
+    public Product updateProduct(ProductDto product) {
         var productEntity = productRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+                .findById(product.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", product.getId()));
 
-        if (productEntity.getCode().equals(product.getCode())) {
+        if (!productEntity.getCode().equals(product.getCode())) {
             productEntity.setCode(product.getCode());
         }
-        if (productEntity.getName().equals(product.getName())) {
+        if (!productEntity.getName().equals(product.getName())) {
             productEntity.setName(product.getName());
         }
-        if (productEntity.getDescription().equals(product.getDescription())) {
+        if (!productEntity.getDescription().equals(product.getDescription())) {
             productEntity.setDescription(product.getDescription());
         }
-        if (productEntity.getPrice().equals(product.getPrice())) {
+        if (!productEntity.getPrice().equals(product.getPrice())) {
             productEntity.setPrice(product.getPrice());
         }
-        if (productEntity.getStock().equals(product.getStock())) {
+        if (!productEntity.getStock().equals(product.getStock())) {
             productEntity.setStock(product.getStock());
         }
-        if (productEntity.getImageName().equals(product.getImageName())) {
+        if (!productEntity.getImageName().equals(product.getImageName())) {
             productEntity.setImageName(product.getImageName());
         }
-        if (productEntity.getStatus().equals(product.getStatus())) {
+        if (!productEntity.getStatus().equals(product.getStatus())) {
             productEntity.setStatus(product.getStatus());
         }
 
         productRepository.save(productEntity);
+        return productEntity;
     }
 
     @Override

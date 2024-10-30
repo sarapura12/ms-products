@@ -6,7 +6,7 @@ ENV JDBC_DATABASE_URL='jdbc:mysql://msproductsDB/productsDB?createDatabaseIfNotE
 ENV JDBC_DATABASE_USERNAME=root
 ENV JDBC_DATABASE_PASSWORD=admin
 
-ARG JAR_FILE=target/ms-products-0.0.1.jar
+ARG JAR_FILE=target/ms-products-0.0.2.jar
 COPY ${JAR_FILE} ms-products.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "ms-products.jar"]

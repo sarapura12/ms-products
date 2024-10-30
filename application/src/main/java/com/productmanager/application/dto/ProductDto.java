@@ -15,8 +15,6 @@ public class ProductDto {
     private String code;
     private ProductStatus status;
 
-
-    private Integer quantity;
     private Integer stock;
 
     private Long supplierId;
@@ -27,7 +25,6 @@ public class ProductDto {
             String name,
             String description,
             Double price,
-            Integer quantity,
             ProductStatus status,
             Long supplierId,
             String code,
@@ -37,7 +34,6 @@ public class ProductDto {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.quantity = quantity;
         this.supplierId = supplierId;
         this.code = code;
         this.stock = stock;

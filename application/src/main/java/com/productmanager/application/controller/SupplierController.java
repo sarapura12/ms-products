@@ -1,9 +1,10 @@
 package com.productmanager.application.controller;
 
 import com.productmanager.application.dto.SupplierDto;
-import com.productmanager.application.mappers.ISupplierMapper;
+import com.productmanager.application.mappers.SupplierMapper;
 import com.productmanager.application.model.entity.Supplier;
 import com.productmanager.application.service.interfaces.ISupplierService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/suppliers")
 public class SupplierController {
     private final ISupplierService supplierService;
-    private final ISupplierMapper supplierMapper;
+    @Autowired
+    private SupplierMapper supplierMapper;
 
-    public SupplierController(ISupplierService supplierService, ISupplierMapper supplierMapper) {
+    public SupplierController(ISupplierService supplierService) {
         this.supplierService = supplierService;
-        this.supplierMapper = supplierMapper;
     }
 
     @GetMapping("/{id}")
@@ -27,17 +28,18 @@ public class SupplierController {
 
     @PostMapping
     public ResponseEntity<SupplierDto> createSupplier(@RequestBody SupplierDto supplierDto) {
-        Supplier supplier = supplierService.createSupplier(supplierMapper.supplierDtoToSupplier(supplierDto));
-        return new ResponseEntity<>(supplierMapper.supplierToSupplierDto(supplier), HttpStatus.CREATED);
+        Supplier supplier = supplierService.createSupplier(supplierDto);
+        var supplierMap = supplierMapper.supplierToSupplierDto(supplier);
+        return new ResponseEntity<>(supplierMap, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SupplierDto> updateSupplier(@PathVariable Long id, @RequestBody SupplierDto supplierDto) {
-        Supplier supplier = supplierService.updateSupplier(id, supplierMapper.supplierDtoToSupplier(supplierDto));
+    @PutMapping
+    public ResponseEntity<SupplierDto> updateSupplier(@RequestBody SupplierDto supplierDto) {
+        Supplier supplier = supplierService.updateSupplier(supplierDto);
         return ResponseEntity.ok(supplierMapper.supplierToSupplierDto(supplier));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<Void> deleteSupplier(@PathVariable Long id) {
         supplierService.deleteSupplier(id);
         return ResponseEntity.noContent().build();

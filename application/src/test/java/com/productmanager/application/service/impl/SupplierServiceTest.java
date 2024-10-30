@@ -1,5 +1,6 @@
 package com.productmanager.application.service.impl;
 
+import com.productmanager.application.dto.SupplierDto;
 import com.productmanager.application.exception.InvalidOperationException;
 import com.productmanager.application.exception.ResourceNotFoundException;
 import com.productmanager.application.model.entity.Supplier;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -31,6 +31,7 @@ class SupplierServiceTest {
 
 
     private Supplier supplier;
+    private SupplierDto supplierDto;
 
     @BeforeEach
     void setUp() {
@@ -39,17 +40,29 @@ class SupplierServiceTest {
         supplier.setEmail("mail@fi.unju.edu.ar");
         supplier.setPhone("388-154-123456");
         supplier.setName("Juan Perez");
+
+        supplierDto = new SupplierDto();
+        supplierDto.setId(1L);
+        supplierDto.setEmail("dto@fi.unju.edu.ar");
+        supplierDto.setPhone("388-154-333333");
+        supplierDto.setName("Juan Perez Dto");
     }
 
     @AfterEach
     void tearDown() {
         supplier = null;
+        supplierDto = null;
     }
 
     @Test
     void createSupplier_EmailAlreadyExists_ThrowsException() {
+        supplierDto.setEmail(supplier.getEmail());
+
+        when(supplierRepository.findSupplierByEmail(supplierDto.getEmail()))
+                .thenReturn(Optional.of(supplier));
+
         InvalidOperationException exception = assertThrows(InvalidOperationException.class, () -> {
-            supplierService.createSupplier(supplier);
+            supplierService.createSupplier(supplierDto);
         });
 
         assertEquals("Supplier", exception.getResourceName());
@@ -58,49 +71,46 @@ class SupplierServiceTest {
 
     @Test
     void createSupplier_Success() {
-        when(supplierRepository.findSupplierByEmail(supplier.getEmail()))
-                .thenReturn(Optional.of(supplier));
+        when(supplierRepository.findSupplierByEmail(supplierDto.getEmail()))
+                .thenReturn(Optional.empty());
 
         when(supplierRepository.save(any(Supplier.class))).thenReturn(supplier);
 
-        Supplier createdSupplier = supplierService.createSupplier(supplier);
+        Supplier createdSupplier = supplierService.createSupplier(supplierDto);
 
         assertNotNull(createdSupplier);
-        assertEquals("Juan Perez", createdSupplier.getName());
-        verify(supplierRepository, times(1)).findSupplierByEmail(supplier.getEmail());
+        assertEquals("dto@fi.unju.edu.ar", createdSupplier.getEmail());
+        assertEquals("388-154-333333", createdSupplier.getPhone());
+        assertEquals("Juan Perez Dto", createdSupplier.getName());
+        verify(supplierRepository, times(1)).findSupplierByEmail(supplierDto.getEmail());
         verify(supplierRepository, times(1)).save(any(Supplier.class));
     }
 
 
     @Test
     void updateSupplier_Success() {
-        var updatedSupplier = supplier;
-        updatedSupplier.setName("Pablo");
-        updatedSupplier.setEmail("pablo@gmail.com");
-
         when(supplierRepository.findById(supplier.getId())).thenReturn(Optional.of(supplier));
-        when(supplierRepository.save(any(Supplier.class))).thenReturn(updatedSupplier);
+        when(supplierRepository.save(any(Supplier.class))).thenReturn(any());
 
-        Supplier result = supplierService.updateSupplier(1L, supplier);
+        Supplier result = supplierService.updateSupplier(supplierDto);
 
-
-        assertNotNull(updatedSupplier);
-        assertEquals("Pablo", result.getName());
-        assertEquals("pablo@gmail.com", result.getEmail());
-        assertEquals("388-154-123456", result.getPhone());
+        assertNotNull(result);
+        supplierDto.setEmail("dto@fi.unju.edu.ar");
+        supplierDto.setPhone("388-154-333333");
+        supplierDto.setName("Juan Perez Dto");
+        assertEquals("Juan Perez Dto", result.getName());
+        assertEquals("dto@fi.unju.edu.ar", result.getEmail());
+        assertEquals("388-154-333333", result.getPhone());
         verify(supplierRepository, times(1)).findById(anyLong());
         verify(supplierRepository, times(1)).save(any(Supplier.class));
     }
 
     @Test
     void updateSupplier_NotFound() {
-        Supplier supplier = new Supplier();
-        supplier.setId(1L);
-
-        when(supplierRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(supplierRepository.findById(supplierDto.getId())).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            supplierService.updateSupplier(1L, supplier);
+            supplierService.updateSupplier(supplierDto);
         });
 
         assertEquals("Supplier", exception.getResourceName());

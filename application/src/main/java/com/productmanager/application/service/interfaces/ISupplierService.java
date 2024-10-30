@@ -1,11 +1,12 @@
 package com.productmanager.application.service.interfaces;
 
+import com.productmanager.application.dto.SupplierDto;
 import com.productmanager.application.model.entity.Supplier;
 
 public interface ISupplierService {
-    Supplier createSupplier(Supplier supplier);
+    Supplier createSupplier(SupplierDto supplierDto);
 
-    Supplier updateSupplier(Long id, Supplier supplier);
+    Supplier updateSupplier(SupplierDto supplierDto);
 
     void deleteSupplier(Long id);
 

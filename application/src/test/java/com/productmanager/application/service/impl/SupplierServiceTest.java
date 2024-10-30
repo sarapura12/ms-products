@@ -106,6 +106,19 @@ class SupplierServiceTest {
     }
 
     @Test
+    void updateSupplier_emailExist() {
+        when(supplierRepository.findById(supplier.getId())).thenReturn(Optional.of(supplier));
+        when(supplierRepository.existsByEmail(supplierDto.getEmail())).thenReturn(true);
+
+        InvalidOperationException exception = assertThrows(InvalidOperationException.class, () -> {
+            Supplier result = supplierService.updateSupplier(supplierDto);
+        });
+
+        verify(supplierRepository, times(1)).findById(anyLong());
+        verify(supplierRepository, times(1)).existsByEmail(anyString());
+    }
+
+    @Test
     void updateSupplier_NotFound() {
         when(supplierRepository.findById(supplierDto.getId())).thenReturn(Optional.empty());
 

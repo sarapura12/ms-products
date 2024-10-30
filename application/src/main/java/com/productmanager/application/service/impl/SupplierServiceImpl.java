@@ -43,6 +43,10 @@ public class SupplierServiceImpl implements ISupplierService {
             supplierEntity.setName(supplierDto.getName());
         }
         if (!supplierEntity.getEmail().equals(supplierDto.getEmail())) {
+            var alreadyExists = supplierRepository.existsByEmail(supplierDto.getEmail());
+            if (alreadyExists) {
+                throw new InvalidOperationException("Supplier", supplierDto.getEmail(), "Email already exists");
+            }
             supplierEntity.setEmail(supplierDto.getEmail());
         }
         if (!supplierEntity.getPhone().equals(supplierDto.getPhone())) {

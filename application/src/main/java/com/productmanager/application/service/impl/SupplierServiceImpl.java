@@ -1,5 +1,6 @@
 package com.productmanager.application.service.impl;
 
+import com.productmanager.application.dto.SupplierDto;
 import com.productmanager.application.exception.InvalidOperationException;
 import com.productmanager.application.exception.ResourceNotFoundException;
 import com.productmanager.application.model.entity.Supplier;
@@ -16,31 +17,44 @@ public class SupplierServiceImpl implements ISupplierService {
 
 
     @Override
-    public Supplier createSupplier(Supplier supplier) {
-        supplierRepository
-                .findSupplierByEmail(supplier.getEmail())
-                .orElseThrow(() -> new InvalidOperationException("Supplier", supplier.getEmail(), "Email already exists"));
+    public Supplier createSupplier(SupplierDto supplierDto) {
+        var sup = supplierRepository.findSupplierByEmail(supplierDto.getEmail()).orElse(null);
 
-        return supplierRepository.save(supplier);
+        if (sup != null) {
+            throw new InvalidOperationException("Supplier", supplierDto.getEmail(), "Email already exists");
+        }
+
+        var supplier = new Supplier();
+        supplier.setName(supplierDto.getName());
+        supplier.setEmail(supplierDto.getEmail());
+        supplier.setPhone(supplierDto.getPhone());
+
+        supplierRepository.save(supplier);
+        return supplier;
     }
 
     @Override
-    public Supplier updateSupplier(Long id, Supplier supplier) {
+    public Supplier updateSupplier(SupplierDto supplierDto) {
         var supplierEntity = supplierRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", id));
+                .findById(supplierDto.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier", "id", supplierDto.getId()));
 
-        if (supplierEntity.getName().equals(supplier.getName())) {
-            supplierEntity.setName(supplier.getName());
+        if (!supplierEntity.getName().equals(supplierDto.getName())) {
+            supplierEntity.setName(supplierDto.getName());
         }
-        if (supplierEntity.getEmail().equals(supplier.getEmail())) {
-            supplierEntity.setEmail(supplier.getEmail());
+        if (!supplierEntity.getEmail().equals(supplierDto.getEmail())) {
+            var alreadyExists = supplierRepository.existsByEmail(supplierDto.getEmail());
+            if (alreadyExists) {
+                throw new InvalidOperationException("Supplier", supplierDto.getEmail(), "Email already exists");
+            }
+            supplierEntity.setEmail(supplierDto.getEmail());
         }
-        if (supplierEntity.getPhone().equals(supplier.getPhone())) {
-            supplierEntity.setPhone(supplier.getPhone());
+        if (!supplierEntity.getPhone().equals(supplierDto.getPhone())) {
+            supplierEntity.setPhone(supplierDto.getPhone());
         }
 
-        return supplierRepository.save(supplierEntity);
+        supplierRepository.save(supplierEntity);
+        return supplierEntity;
     }
 
     @Override

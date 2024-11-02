@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Mapper(componentModel = "spring")
 @Component
-public interface ISupplierMapper {
+public interface SupplierMapper {
     SupplierDto supplierToSupplierDto(Supplier supplier);
 
     Supplier supplierDtoToSupplier(SupplierDto supplierDto);

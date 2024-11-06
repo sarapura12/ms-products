@@ -1,4 +1,14 @@
 services:
+  ms-configs:
+    image: sarapura12/configserver
+    container_name: ms-configs
+    mem_limit: 800m
+    expose:
+      - "8085"
+    ports:
+      - "8085:8085"
+    networks:
+        - team-network
 
   ms-sales:
     image: sarapura12/ms-sales:latest
@@ -6,43 +16,63 @@ services:
     mem_limit: 800m
     ports:
       - "8080:8080"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+            
     environment:
-      JDBC_DATABASE_URL: jdbc:mysql://msDB:3306/mssalesDB?createDatabaseIfNotExist=true&autoReconnect=true&serverTimeZone=GMT-3
-      JDBC_DATABASE_USERNAME: root
-      JDBC_DATABASE_PASSWORD: admin
+        SPRING_PROFILES_ACTIVE: default
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
-      - sarapura12-network
+      - team-network
     depends_on:
+      - ms-configs
       - msDB
+  
 
   ms-products:
     image: sarapura12/ms-products:latest
     container_name: ms-products
     mem_limit: 800m
-    environment:
-      JDBC_DATABASE_URL: jdbc:mysql://msDB:3306/msproductsDB?createDatabaseIfNotExist=true&autoReconnect=true&serverTimeZone=GMT-3
-      JDBC_DATABASE_USERNAME: root
-      JDBC_DATABASE_PASSWORD: admin
     ports:
       - "8081:8081"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+    environment:
+        SPRING_PROFILES_ACTIVE: default
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
-      - sarapura12-network
+      - team-network
     depends_on:
+      - ms-configs
       - msDB
 
   ms-clients:
     image: sarapura12/ms-clients:latest
     container_name: ms-clients
     mem_limit: 800m
-    environment:
-      JDBC_DATABASE_URL: jdbc:mysql://msDB:3306/msclientsDB?createDatabaseIfNotExist=true&autoReconnect=true&serverTimeZone=GMT-3
-      JDBC_DATABASE_USERNAME: root
-      JDBC_DATABASE_PASSWORD: admin
     ports:
       - "8082:8082"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+    environment:
+        SPRING_PROFILES_ACTIVE: default
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
-      - sarapura12-network
+      - team-network
     depends_on:
+      - ms-configs
       - msDB
 
 
@@ -62,8 +92,8 @@ services:
       timeout: 10s
     restart: always
     networks:
-      - sarapura12-network
+      - team-network
 
 networks:
-  sarapura12-network:
+  team-network:
     driver: bridge

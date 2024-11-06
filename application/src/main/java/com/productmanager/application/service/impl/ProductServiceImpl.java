@@ -1,8 +1,10 @@
 package com.productmanager.application.service.impl;
 
 import com.productmanager.application.dto.ProductDto;
+import com.productmanager.application.exception.InvalidOperationException;
 import com.productmanager.application.exception.ResourceNotFoundException;
 import com.productmanager.application.model.entity.Product;
+import com.productmanager.application.model.enums.ProductStatus;
 import com.productmanager.application.repository.IProductRepository;
 import com.productmanager.application.repository.ISupplierRepository;
 import com.productmanager.application.service.interfaces.IProductService;
@@ -98,6 +100,24 @@ public class ProductServiceImpl implements IProductService {
             throw new ResourceNotFoundException("Product", "searchKey", searchKey);
         }
         return products;
+    }
+
+    @Override
+    public void discountProduct(Long id, Integer quantity) {
+        var product = productRepository
+                .findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", id));
+
+        if (product.getStatus() == ProductStatus.NOT_AVAILABLE) {
+            throw new InvalidOperationException("Product Status, ", product.getStatus(), "Product is inactive");
+        }
+
+        if (quantity > product.getStock()) {
+            throw new InvalidOperationException("Product", id, "Not enough stock");
+        }
+
+        product.setStock(product.getStock() - quantity);
+        productRepository.save(product);
     }
 
 

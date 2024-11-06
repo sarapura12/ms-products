@@ -17,4 +17,6 @@ public interface IProductService {
     List<Product> getProductsBySupplierId(Long supplierId);
 
     List<Product> getProductsByKey(String searchKey);
+
+    void discountProduct(Long id, Integer quantity);
 }

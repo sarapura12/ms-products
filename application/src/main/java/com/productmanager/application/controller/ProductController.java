@@ -57,5 +57,11 @@ public class ProductController {
         return productService.getProductsBySupplierId(supplierId);
     }
 
+    @PutMapping("/{id}/discount")
+    public ResponseEntity<ProductDto> discountProduct(@PathVariable Long id, @RequestParam Integer quantity) {
+        productService.discountProduct(id, quantity);
+        return ResponseEntity.ok(productMapper.productToProductDto(productService.getProductById(id)));
+    }
+
 }
 

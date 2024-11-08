@@ -1,22 +1,88 @@
-version: '3.7'
-
 services:
-  api_service:
-    build: application
-    container_name: ms-products
+  ms-configs:
+    image: sarapura12/configserver
+    container_name: ms-configs
+    mem_limit: 800m
+    expose:
+      - "8085"
+    ports:
+      - "8085:8085"
+    networks:
+        - team-network
+
+  ms-sales:
+    image: sarapura12/ms-sales:latest
+    container_name: ms-sales
+    mem_limit: 800m
+    expose:
+      - "8080"
     ports:
       - "8080:8080"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+            
     environment:
-      JDBC_DATABASE_URL: jdbc:mysql://msproductsDB:3306/productsDB?createDatabaseIfNotExist=true&autoReconnect=true&serverTimeZone=GMT-3
-      JDBC_DATABASE_USERNAME: root
-      JDBC_DATABASE_PASSWORD: admin
-    restart: always
+        SPRING_PROFILES_ACTIVE: dev
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
-        - my_app
+      - team-network
     depends_on:
-     - msproductsDB
+      - ms-configs
+      - msDB
+  
 
-  msproductsDB:
+  ms-products:
+    image: sarapura12/ms-products:latest
+    container_name: ms-products
+    mem_limit: 800m
+    expose:
+      - "8081"
+    ports:
+      - "8081:8081"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+    environment:
+        SPRING_PROFILES_ACTIVE: dev
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
+    networks:
+      - team-network
+    depends_on:
+      - ms-configs
+      - msDB
+
+  ms-clients:
+    image: sarapura12/ms-clients:latest
+    container_name: ms-clients
+    mem_limit: 800m
+    expose:
+      - "8082"
+    ports:
+      - "8082:8082"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+    environment:
+        SPRING_PROFILES_ACTIVE: dev
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
+    networks:
+      - team-network
+    depends_on:
+      - ms-configs
+      - msDB
+
+
+  msDB:
     image: mysql:latest
     expose:
       - "3306"
@@ -24,16 +90,16 @@ services:
       - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: productsDB
-    networks:
-        - my_app
+      MYSQL_DATABASE: msDB
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       interval: 2s
       retries: 10
       timeout: 10s
     restart: always
+    networks:
+      - team-network
 
 networks:
-  my_app:
+  team-network:
     driver: bridge

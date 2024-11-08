@@ -14,6 +14,8 @@ services:
     image: sarapura12/ms-sales:latest
     container_name: ms-sales
     mem_limit: 800m
+    expose:
+      - "8080"
     ports:
       - "8080:8080"
     deploy:
@@ -24,7 +26,7 @@ services:
             window: 120s
             
     environment:
-        SPRING_PROFILES_ACTIVE: default
+        SPRING_PROFILES_ACTIVE: dev
         SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
       - team-network
@@ -37,6 +39,8 @@ services:
     image: sarapura12/ms-products:latest
     container_name: ms-products
     mem_limit: 800m
+    expose:
+      - "8081"
     ports:
       - "8081:8081"
     deploy:
@@ -46,7 +50,7 @@ services:
             max_attempts: 3
             window: 120s
     environment:
-        SPRING_PROFILES_ACTIVE: default
+        SPRING_PROFILES_ACTIVE: dev
         SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
       - team-network
@@ -58,6 +62,8 @@ services:
     image: sarapura12/ms-clients:latest
     container_name: ms-clients
     mem_limit: 800m
+    expose:
+      - "8082"
     ports:
       - "8082:8082"
     deploy:
@@ -67,7 +73,7 @@ services:
             max_attempts: 3
             window: 120s
     environment:
-        SPRING_PROFILES_ACTIVE: default
+        SPRING_PROFILES_ACTIVE: dev
         SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
     networks:
       - team-network

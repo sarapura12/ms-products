@@ -14,7 +14,7 @@ services:
     image: sarapura12/eurekaserver:latest
     mem_limit: 800m
     ports:
-      - "8761:8761"
+      - "8065:8065"
     networks:
         - team-network
     depends_on:

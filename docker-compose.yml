@@ -9,7 +9,34 @@ services:
       - "8085:8085"
     networks:
         - team-network
-  
+
+  gatewayServer:
+    image: sarapura12/gatewayserver
+    container_name: gatewayserver
+    mem_limit: 800m
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    expose:
+      - "8066"
+    environment:
+      SPRING_PROFILE_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
+    ports:
+      - "8066:8066"
+    networks:
+      - team-network
+    depends_on:
+      - eurekaserver
+      - ms-configs
+      - ms-sales
+      - ms-clients
+      - ms-products
+      - msDB
+
   eurekaserver:
     image: sarapura12/eurekaserver:latest
     mem_limit: 800m

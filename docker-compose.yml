@@ -56,6 +56,29 @@ services:
       SPRING_PROFILE_ACTIVE: dev
       SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
 
+  ms-identity:
+    image: sarapura12/ms-identity:latest
+    container_name: ms-identity
+    mem_limit: 800m
+    expose:
+      - "8083"
+    ports:
+      - "8083:8083"
+    deploy:
+        restart_policy:
+            condition: on-failure
+            delay: 5s
+            max_attempts: 3
+            window: 120s
+    environment:
+        SPRING_PROFILE_ACTIVE: dev
+        SPRING_CONFIG_IMPORT: optional:configserver:http://ms-configs:8085/
+    networks:
+      - team-network
+    depends_on:
+      - ms-configs
+      - msDB
+
   ms-sales:
     image: sarapura12/ms-sales:latest
     container_name: ms-sales
